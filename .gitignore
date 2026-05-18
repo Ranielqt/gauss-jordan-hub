@@ -1,0 +1,19 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+venv/
+env/
+.env
+.venv
+
+# Node/React
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

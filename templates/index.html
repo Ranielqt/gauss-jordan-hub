@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gauss–Jordan Solver</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono&display=swap');
+        
+        :root {
+            --bg-dark: #0a0a0c;
+            --bg-panel: #111114;
+            --brand: #3b82f6;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #d1d5db;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-[#0a0a0c]/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/20">G</div>
+            <span class="text-xl font-serif italic text-white tracking-tight">GaussJordan <span class="text-[10px] bg-blue-600/10 text-blue-500 font-sans font-bold px-2 py-0.5 rounded ml-1 uppercase">Flask</span></span>
+        </div>
+        <nav class="hidden md:flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500">
+            <a href="#discussion" class="hover:text-white transition-colors">Discussion</a>
+            <a href="#examples" class="hover:text-white transition-colors">Worked Examples</a>
+            <a href="#calculator" class="hover:text-blue-500 text-blue-600 transition-colors">Interactive Solver</a>
+        </nav>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-12 space-y-32">
+        
+        <!-- Part I: Mathematical Discussion -->
+        <section id="discussion" class="grid lg:grid-cols-2 gap-16 items-start">
+            <div>
+                <h2 class="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-500 mb-6 font-sans">Project Part I</h2>
+                <h1 class="text-5xl font-serif italic text-white mb-8 leading-[1.1]">The Mechanics of Gauss-Jordan Elimination</h1>
+                <div class="space-y-6 text-gray-400 leading-relaxed font-light">
+                    <p>
+                        Gauss–Jordan elimination is an extension of standard Gaussian elimination. While the latter seeks to transform a matrix into <strong>Row Echelon Form (REF)</strong>, Gauss-Jordan continues the process until the matrix reaches <strong>Reduced Row Echelon Form (RREF)</strong>.
+                    </p>
+                    <p>
+                        The core objective is to apply <strong>Elementary Row Operations</strong>—swapping rows, multiplying by non-zero scalars, and adding multiples of rows together—until the coefficient portion of the augmented matrix becomes the Identity matrix \(I\).
+                    </p>
+                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10 font-mono text-sm italic">
+                        "For a system \(Ax = b\), the RREF of \([A|b]\) provides the solution vector directly in the final column."
+                    </div>
+                </div>
+            </div>
+            <div class="glass-panel p-8 space-y-8">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-white border-b border-white/5 pb-4">Elementary Operations</h3>
+                <ul class="space-y-6">
+                    <li class="flex gap-4">
+                        <span class="text-blue-500 font-bold">01.</span>
+                        <div>
+                            <p class="text-white font-medium mb-1">Row Swapping</p>
+                            <p class="text-xs text-gray-500">Interchange two rows to bring a non-zero element to the pivot position.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-4">
+                        <span class="text-blue-500 font-bold">02.</span>
+                        <div>
+                            <p class="text-white font-medium mb-1">Scalar Multiplication</p>
+                            <p class="text-xs text-gray-500">Multiply a row by a non-zero constant to normalize the pivot element to 1.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-4">
+                        <span class="text-blue-500 font-bold">03.</span>
+                        <div>
+                            <p class="text-white font-medium mb-1">Row Addition</p>
+                            <p class="text-xs text-gray-500">Add a multiple of one row to another to produce zeros in the pivot's column.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Part II: Worked Examples -->
+        <section id="examples" class="space-y-16">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-500 mb-4 font-sans">Project Part II</h2>
+                <h1 class="text-4xl font-serif italic text-white mb-6">Fully Worked Examples</h1>
+                <p class="text-gray-500 font-light italic">"Showing all intermediate steps as per the manual implementation requirement."</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- Detailed Example 1 -->
+                <div class="glass-panel overflow-hidden border border-white/5 bg-white/[0.02] shadow-2xl">
+                    <div class="p-6 bg-blue-600/5 border-b border-white/5 flex justify-between items-center">
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-blue-400">Example I: 2x2 Basic System</span>
+                        <span class="text-[9px] text-gray-500 font-mono">Status: Direct Solution</span>
+                    </div>
+                    <div class="p-8 space-y-8">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-4 font-bold">The Problem</p>
+                            <p class="text-sm text-gray-400 mb-4 leading-relaxed">Solve for \(x\) and \(y\) using row normalization and elimination:</p>
+                            <div class="bg-black/40 p-6 rounded-2xl text-center text-white border border-white/5">
+                                \[ \begin{cases} 2x + y = 8 \\ 3x - y = 7 \end{cases} \]
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-8 relative before:absolute before:left-3 before:top-4 before:bottom-4 before:w-px before:bg-white/5">
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">1</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Form Augmented Matrix</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{cc|c} 2 & 1 & 8 \\ 3 & -1 & 7 \end{array} \right) \]
+                                    <p class="text-[9px] text-gray-600 mt-2 italic">Capture coefficients into a table.</p>
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">2</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Normalize Row 1 (\(R_1 = \frac{1}{2}R_1\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{cc|c} 1 & 0.5 & 4 \\ 3 & -1 & 7 \end{array} \right) \]
+                                    <p class="text-[9px] text-gray-600 mt-2 italic">Scale pivot \(a_{11}\) to 1.</p>
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">3</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Eliminate Below (\(R_2 = R_2 - 3R_1\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{cc|c} 1 & 0.5 & 4 \\ 0 & -2.5 & -5 \end{array} \right) \]
+                                    <p class="text-[9px] text-gray-600 mt-2 italic">Zero out the column under the first pivot.</p>
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">4</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Normalize Row 2 (\(R_2 = \frac{R_2}{-2.5}\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{cc|c} 1 & 0.5 & 4 \\ 0 & 1 & 2 \end{array} \right) \]
+                                    <p class="text-[9px] text-gray-600 mt-2 italic">Final normalization for the second variable.</p>
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">5</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Eliminate Above (\(R_1 = R_1 - 0.5R_2\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{cc|c} 1 & 0 & 3 \\ 0 & 1 & 2 \end{array} \right) \]
+                                    <p class="text-[9px] text-gray-600 mt-2 italic">Reaching reduced row echelon form (RREF).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-8 border-t border-white/5 text-center">
+                            <span class="text-[10px] uppercase font-bold text-blue-500 block mb-2">Final Solution Vector</span>
+                            <div class="text-3xl font-serif italic text-white tracking-widest">
+                                x = 3, y = 2
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Example 2 -->
+                <div class="glass-panel overflow-hidden border border-white/5 bg-white/[0.02] shadow-2xl">
+                    <div class="p-6 bg-blue-600/5 border-b border-white/5 flex justify-between items-center">
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-blue-400">Example II: 3x3 Advanced System</span>
+                        <span class="text-[9px] text-gray-500 font-mono">Status: Multi-Step Elimination</span>
+                    </div>
+                    <div class="p-8 space-y-8">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-4 font-bold">The Problem</p>
+                            <p class="text-sm text-gray-400 mb-4 leading-relaxed">Solve for \(x, y,\) and \(z\) using an elimination sequence:</p>
+                            <div class="bg-black/40 p-6 rounded-2xl text-center text-white border border-white/5">
+                                \[ \begin{cases} x + y + z = 6 \\ 2y + 5z = -4 \\ 2x + 5y - z = 27 \end{cases} \]
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-8 relative before:absolute before:left-3 before:top-4 before:bottom-4 before:w-px before:bg-white/5 max-h-[600px] overflow-y-auto pr-4">
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">1</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Initial Augmented Matrix</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{ccc|c} 1 & 1 & 1 & 6 \\ 0 & 2 & 5 & -4 \\ 2 & 5 & -1 & 27 \end{array} \right) \]
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">2</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Zero out \(x\) in \(R_3\) (\(R_3 = R_3 - 2R_1\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{ccc|c} 1 & 1 & 1 & 6 \\ 0 & 2 & 5 & -4 \\ 0 & 3 & -3 & 15 \end{array} \right) \]
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">3</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Normalize Row 2 (\(R_2 = \frac{1}{2}R_2\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{ccc|c} 1 & 1 & 1 & 6 \\ 0 & 1 & 2.5 & -2 \\ 0 & 3 & -3 & 15 \end{array} \right) \]
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">4</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Eliminate Below Pivot (\(R_3 = R_3 - 3R_2\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{ccc|c} 1 & 1 & 1 & 6 \\ 0 & 1 & 2.5 & -2 \\ 0 & 0 & -10.5 & 21 \end{array} \right) \]
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">5</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Normalize Row 3 (\(R_3 = \frac{R_3}{-10.5}\))</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{ccc|c} 1 & 1 & 1 & 6 \\ 0 & 1 & 2.5 & -2 \\ 0 & 0 & 1 & -2 \end{array} \right) \]
+                                </div>
+                            </div>
+
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1 w-6 h-6 bg-blue-600/20 border border-blue-600/30 rounded-full flex items-center justify-center text-[10px] text-blue-400 font-bold">6</div>
+                                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Final Back-Substitution</p>
+                                <div class="bg-white/5 p-4 rounded-xl text-center border border-white/10 group hover:border-blue-500/30 transition-all">
+                                    \[ \left( \begin{array}{ccc|c} 1 & 0 & 0 & 5 \\ 0 & 1 & 0 & 3 \\ 0 & 0 & 1 & -2 \end{array} \right) \]
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-8 border-t border-white/5 text-center">
+                            <span class="text-[10px] uppercase font-bold text-blue-500 block mb-2">Final Solution Vector</span>
+                            <div class="text-3xl font-serif italic text-white tracking-widest">
+                                x=5, y=3, z=-2
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part III: Interactive Solver -->
+        <section id="calculator" class="space-y-12">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-500 mb-4 font-sans">Project Part III</h2>
+                <h1 class="text-4xl font-serif italic text-white mb-6">Interactive Solver <span class="text-xs font-sans not-italic text-gray-500 ml-2">v2.1</span></h1>
+                <p class="text-gray-500 font-light">Customize rows and columns to solve any linear system with absolute precision.</p>
+            </div>
+
+            <div class="glass-panel p-8 lg:p-12">
+                <div class="max-w-3xl mx-auto space-y-10">
+                    <div class="flex flex-wrap justify-center gap-6 items-end bg-white/5 p-6 rounded-2xl border border-white/10">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">Equations (Rows)</label>
+                            <input type="number" id="input-rows" value="2" min="1" max="10" onchange="updateCustomGrid()" class="w-24 p-3 bg-bg-dark border border-white/10 rounded-xl text-center text-white focus:border-blue-500 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">Variables (Cols)</label>
+                            <input type="number" id="input-cols" value="2" min="1" max="10" onchange="updateCustomGrid()" class="w-24 p-3 bg-bg-dark border border-white/10 rounded-xl text-center text-white focus:border-blue-500 transition-all">
+                        </div>
+                        <div class="flex gap-2 pb-1">
+                            <button onclick="setQuickSize(2)" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold hover:bg-blue-600 transition-all">2X2</button>
+                            <button onclick="setQuickSize(3)" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold hover:bg-blue-600 transition-all">3X3</button>
+                        </div>
+                    </div>
+
+                    <div id="grid-container" class="grid gap-4 justify-center overflow-x-auto py-4">
+                        <!-- Dynamic Grid -->
+                    </div>
+
+                    <div class="flex justify-center pt-8 gap-4">
+                        <button onclick="solve()" class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/20 transition-all flex items-center gap-3">
+                            <span>Execute Solver</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                        </button>
+                    </div>
+
+                    <div id="results" class="hidden space-y-12 pt-16 border-t border-white/5">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <h3 class="font-serif italic text-2xl text-white">Calculation Steps</h3>
+                            <button onclick="exportSteps()" class="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                <span>Export Solution (.txt)</span>
+                            </button>
+                        </div>
+                        <div id="steps-container" class="space-y-8"></div>
+                        
+                        <div id="final-answer" class="p-8 bg-blue-600/10 border border-blue-600/30 rounded-3xl text-center shadow-2xl shadow-blue-600/5">
+                            <p class="text-[10px] uppercase font-bold text-blue-500 tracking-[0.3em] mb-4">Calculated Solution</p>
+                            <div id="sol-values" class="flex flex-wrap justify-center gap-6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-[10px] uppercase tracking-widest">
+        &copy; 2026 Academic Project • Powered by Flask & MathJax
+    </footer>
+
+    <script>
+        let currentRows = 2;
+        let currentCols = 2;
+        let lastResult = null;
+
+        function setQuickSize(n) {
+            document.getElementById('input-rows').value = n;
+            document.getElementById('input-cols').value = n;
+            updateCustomGrid();
+        }
+
+        function updateCustomGrid() {
+            currentRows = parseInt(document.getElementById('input-rows').value) || 2;
+            currentCols = parseInt(document.getElementById('input-cols').value) || 2;
+            
+            const container = document.getElementById('grid-container');
+            container.style.gridTemplateColumns = `repeat(${currentCols + 1}, minmax(80px, 1fr))`;
+            
+            let html = '';
+            for (let i = 0; i < currentRows; i++) {
+                for (let j = 0; j <= currentCols; j++) {
+                    const isResultCol = j === currentCols;
+                    html += `
+                        <div class="relative">
+                            ${i === 0 ? `<div class="absolute -top-6 left-0 right-0 text-[10px] text-center text-gray-600 font-extrabold uppercase tracking-widest">${isResultCol ? 'Constant' : 'x' + (j+1)}</div>` : ''}
+                            <input type="number" step="any" value="0" class="matrix-input w-full p-4 rounded-xl bg-white/5 border border-white/10 text-center font-mono text-white focus:border-blue-500 focus:bg-blue-600/5 transition-all ${isResultCol ? 'border-blue-500/40 bg-blue-500/5' : ''}" data-row="${i}" data-col="${j}">
+                        </div>
+                    `;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        async function solve() {
+            const inputs = document.querySelectorAll('.matrix-input');
+            const matrix = Array.from({ length: currentRows }, () => Array(currentCols + 1).fill(0));
+            
+            inputs.forEach(input => {
+                const r = parseInt(input.dataset.row);
+                const c = parseInt(input.dataset.col);
+                matrix[r][c] = parseFloat(input.value) || 0;
+            });
+
+            const response = await fetch('/solve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matrix })
+            });
+
+            const data = await response.json();
+            lastResult = data;
+            if (data.success) {
+                renderSteps(data.steps, data.solution);
+            } else {
+                alert('Analysis Complete: The system is either inconsistent or has infinite solutions.');
+                if(data.steps) renderSteps(data.steps, null);
+                else document.getElementById('results').classList.add('hidden');
+            }
+        }
+
+        function renderSteps(steps, solution) {
+            const container = document.getElementById('steps-container');
+            const resultsDiv = document.getElementById('results');
+            const solValues = document.getElementById('sol-values');
+            resultsDiv.classList.remove('hidden');
+            
+            container.innerHTML = steps.map((step, idx) => `
+                <div class="flex flex-col md:flex-row gap-8 items-center bg-white/5 p-6 rounded-2xl border border-white/10 transition-all hover:bg-white/[0.07]">
+                    <div class="w-full md:w-1/3">
+                        <span class="text-[9px] uppercase font-bold text-blue-500 tracking-widest">Step ${idx + 1}</span>
+                        <p class="text-sm text-gray-400 mt-2 font-light italic">"${step.description}"</p>
+                    </div>
+                    <div class="flex-1 flex justify-center py-6 bg-black/20 rounded-xl border border-white/5">
+                        <div class="latex-container overflow-x-auto px-4">
+                            \\[ \\left( \\begin{array}{${'c'.repeat(currentCols)}|c} ${step.matrix.map(row => row.map(v => Math.abs(v) < 1e-10 ? 0 : (Number.isInteger(v) ? v : v.toFixed(2))).join(' & ')).join(' \\\\ ')} \\end{array} \\right) \\]
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            solValues.innerHTML = solution ? solution.map((val, idx) => `
+                <div class="flex items-center gap-4 bg-blue-600/10 px-6 py-3 rounded-2xl border border-blue-600/20 min-w-[140px] justify-between">
+                    <span class="text-blue-400 font-mono text-xs font-bold">${['x', 'y', 'z', 'w'][idx] || 'x' + (idx+1)}</span>
+                    <span class="text-white font-bold font-mono text-xl">${Math.abs(val) < 1e-10 ? 0 : (Number.isInteger(val) ? val : val.toFixed(3))}</span>
+                </div>
+            `).join('') : '<p class="text-red-400 text-xs font-bold uppercase tracking-widest">Inconsistent System - Manual check required</p>';
+
+            MathJax.typeset();
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function exportSteps() {
+            if (!lastResult) return;
+            let text = "GAUSS-JORDAN ELIMINATION SOLUTION\n";
+            text += "===================================\n\n";
+            
+            lastResult.steps.forEach((step, idx) => {
+                text += `STEP ${idx + 1}: ${step.description}\n`;
+                step.matrix.forEach(row => {
+                    text += "[ " + row.map(v => v.toFixed(3).padStart(8)).join(" ") + " ]\n";
+                });
+                text += "\n";
+            });
+            
+            if (lastResult.solution) {
+                text += "FINAL SOLUTION:\n";
+                lastResult.solution.forEach((val, idx) => {
+                    text += `${['x','y','z','w'][idx] || 'x'+(idx+1)} = ${val.toFixed(4)}\n`;
+                });
+            } else {
+                text += "RESULT: System is inconsistent or has infinite solutions.\n";
+            }
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gauss_jordan_solution.txt';
+            a.click();
+        }
+
+        updateCustomGrid();
+    </script>
+</body>
+</html>
