@@ -35,6 +35,30 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+
+        /* Fix for matrix grid - ensures proper layout */
+        #grid-container {
+            display: grid !important;
+            gap: 12px !important;
+            justify-content: center !important;
+            margin: 30px auto !important;
+            overflow-x: auto !important;
+            padding: 10px !important;
+        }
+
+        .matrix-input {
+            min-width: 90px !important;
+            width: 100% !important;
+        }
+
+        /* Ensure the calculator section doesn't clip content */
+        #calculator {
+            overflow: visible !important;
+        }
+
+        .glass-panel {
+            overflow: visible !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -268,11 +292,11 @@
                     <div class="flex flex-wrap justify-center gap-6 items-end bg-white/5 p-6 rounded-2xl border border-white/10">
                         <div class="space-y-2">
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">Equations (Rows)</label>
-                            <input type="number" id="input-rows" value="2" min="1" max="10" onchange="updateCustomGrid()" class="w-24 p-3 bg-bg-dark border border-white/10 rounded-xl text-center text-white focus:border-blue-500 transition-all">
+                            <input type="number" id="input-rows" value="3" min="1" max="10" onchange="updateCustomGrid()" class="w-24 p-3 bg-bg-dark border border-white/10 rounded-xl text-center text-white focus:border-blue-500 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">Variables (Cols)</label>
-                            <input type="number" id="input-cols" value="2" min="1" max="10" onchange="updateCustomGrid()" class="w-24 p-3 bg-bg-dark border border-white/10 rounded-xl text-center text-white focus:border-blue-500 transition-all">
+                            <input type="number" id="input-cols" value="3" min="1" max="10" onchange="updateCustomGrid()" class="w-24 p-3 bg-bg-dark border border-white/10 rounded-xl text-center text-white focus:border-blue-500 transition-all">
                         </div>
                         <div class="flex gap-2 pb-1">
                             <button onclick="setQuickSize(2)" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold hover:bg-blue-600 transition-all">2X2</button>
@@ -280,8 +304,8 @@
                         </div>
                     </div>
 
-                    <div id="grid-container" class="grid gap-4 justify-center overflow-x-auto py-4">
-                        <!-- Dynamic Grid -->
+                    <div id="grid-container">
+                        <!-- Dynamic Grid will appear here -->
                     </div>
 
                     <div class="flex justify-center pt-8 gap-4">
@@ -316,8 +340,8 @@
     </footer>
 
     <script>
-        let currentRows = 2;
-        let currentCols = 2;
+        let currentRows = 3;
+        let currentCols = 3;
         let lastResult = null;
 
         function setQuickSize(n) {
@@ -327,20 +351,29 @@
         }
 
         function updateCustomGrid() {
-            currentRows = parseInt(document.getElementById('input-rows').value) || 2;
-            currentCols = parseInt(document.getElementById('input-cols').value) || 2;
+            currentRows = parseInt(document.getElementById('input-rows').value) || 3;
+            currentCols = parseInt(document.getElementById('input-cols').value) || 3;
             
             const container = document.getElementById('grid-container');
-            container.style.gridTemplateColumns = `repeat(${currentCols + 1}, minmax(80px, 1fr))`;
+            
+            // FIX: Proper grid display with explicit styles
+            container.style.display = 'grid';
+            container.style.gridTemplateColumns = `repeat(${currentCols + 1}, minmax(90px, 110px))`;
+            container.style.gap = '12px';
+            container.style.justifyContent = 'center';
+            container.style.alignItems = 'center';
+            container.style.margin = '20px auto';
+            container.style.overflowX = 'auto';
+            container.style.padding = '10px';
             
             let html = '';
             for (let i = 0; i < currentRows; i++) {
                 for (let j = 0; j <= currentCols; j++) {
                     const isResultCol = j === currentCols;
                     html += `
-                        <div class="relative">
-                            ${i === 0 ? `<div class="absolute -top-6 left-0 right-0 text-[10px] text-center text-gray-600 font-extrabold uppercase tracking-widest">${isResultCol ? 'Constant' : 'x' + (j+1)}</div>` : ''}
-                            <input type="number" step="any" value="0" class="matrix-input w-full p-4 rounded-xl bg-white/5 border border-white/10 text-center font-mono text-white focus:border-blue-500 focus:bg-blue-600/5 transition-all ${isResultCol ? 'border-blue-500/40 bg-blue-500/5' : ''}" data-row="${i}" data-col="${j}">
+                        <div style="position: relative;">
+                            ${i === 0 ? `<div style="position: absolute; top: -24px; left: 0; right: 0; text-align: center; font-size: 10px; color: #6b7280; font-weight: bold; text-transform: uppercase;">${isResultCol ? 'b' : `x${j+1}`}</div>` : ''}
+                            <input type="number" step="any" value="0" class="matrix-input" style="width: 100%; min-width: 90px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid ${isResultCol ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.1)'}; text-align: center; color: white; font-family: monospace; font-size: 14px;" data-row="${i}" data-col="${j}">
                         </div>
                     `;
                 }
@@ -436,6 +469,7 @@
             a.click();
         }
 
+        // Initialize the grid on page load
         updateCustomGrid();
     </script>
 </body>
