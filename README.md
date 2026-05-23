@@ -1,20 +1,61 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Gauss-Jordan Elimination Calculator
 
-# Run and deploy your AI Studio app
+A fully interactive web application that solves systems of linear equations using the Gauss-Jordan elimination method. Built with Flask (Python backend) and HTML/CSS/JavaScript (frontend), deployed on Vercel.
 
-This contains everything you need to run your app locally.
+## Live Demo
 
-View your app in AI Studio: https://ai.studio/apps/8ed3dbd5-af39-4c23-8f78-c3fb1cd65d11
+🔗 **https://gauss-jordan-hub.vercel.app**
 
-## Run Locally
+## Features
 
-**Prerequisites:**  Node.js
+- **Mathematical Discussion** — Clear explanation of Gauss-Jordan elimination and elementary row operations
+- **Two Worked Examples** — Step-by-step solutions for 2×2 and 3×3 systems with all intermediate matrices shown
+- **Interactive Calculator** — Dynamic matrix sizing (1-6 rows, 2-7 columns) with a customizable input grid
+- **Step-by-Step Results** — Each elimination step is displayed with proper LaTeX matrix formatting
+- **Export Functionality** — Download the complete solution steps as a .txt file
+- **Responsive Design** — Works on desktop, tablet, and mobile devices
 
+## Tech Stack
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+| Layer | Technology |
+|-------|------------|
+| Backend | Python 3.9+ with Flask |
+| Frontend | HTML5, CSS3 (Tailwind CSS), JavaScript |
+| Math Rendering | MathJax (LaTeX to formatted math) |
+| Deployment | Vercel (Serverless Python Runtime) |
+| Version Control | Git + GitHub |
+
+## Project Structure
+gauss-jordan-hub/
+├── app.py # Flask application (routes & request handling)
+├── gauss_jordan.py # Gauss-Jordan elimination algorithm (manual implementation)
+├── requirements.txt # Python dependencies
+├── vercel.json # Vercel deployment configuration
+├── .gitignore # Git ignore rules
+├── README.md # Project documentation
+└── templates/
+└── index.html # Frontend (HTML, CSS, JavaScript, MathJax)
+
+## Installation (Local Development)
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package manager)
+
+### Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Ranielqt/gauss-jordan-hub.git
+   cd gauss-jordan-hub
+
+   # Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Mac/Linux
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+python app.py
